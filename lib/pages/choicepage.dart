@@ -84,7 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     color: Colors.teal,
                     elevation: 20.0,
                     onPressed: () {
-                      null;
+                      Navigator.pushReplacementNamed(context, "/adminlogin");
                     },
                     child: new Text("I am Admin", style: btnLable),
                     shape: new RoundedRectangleBorder(

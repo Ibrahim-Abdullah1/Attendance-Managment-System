@@ -1,47 +1,35 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../user/Utilis/Constants.dart';
-
-class login extends StatefulWidget {
-  const login({Key? key}) : super(key: key);
+class adminlogin extends StatefulWidget {
+  const adminlogin({Key? key}) : super(key: key);
 
   @override
-  State<login> createState() => _loginState();
+  State<adminlogin> createState() => _adminloginState();
 }
 
-class _loginState extends State<login> {
+class _adminloginState extends State<adminlogin> {
   final _formkey = GlobalKey<FormState>();
   final _emailcontroller = TextEditingController();
   final _passwordcontroller = TextEditingController();
 
+  String admin_email = "ibrahim123@gmail.com";
+  String admin_password = "asd123";
+
   String _email = "";
   String _password = "";
 
-  login_method() async {
-    try {
-      await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: _email, password: _password);
-      Navigator.pushNamed(context, '/usermain');
-      Constants.prefs?.setBool("Loggedin", true);
-    } on FirebaseAuthException catch (e) {
-      if (e.code == "user-not-found") {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-            'Email Not Found',
-            style: TextStyle(color: Colors.redAccent),
-          ),
-          duration: Duration(seconds: 2),
-        ));
-      } else if (e.code == "wrong-password") {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-            'Password Not Matched',
-            style: TextStyle(color: Colors.redAccent),
-          ),
-          duration: Duration(seconds: 2),
-        ));
-      }
+  login_method() {
+    if (_email == admin_email && _password == admin_password) {
+      Navigator.pushReplacementNamed(context, "/adminhome");
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text(
+          'Invalid Email or Password',
+          style: TextStyle(color: Colors.redAccent),
+        ),
+        duration: Duration(seconds: 2),
+      ));
     }
   }
 
@@ -113,21 +101,6 @@ class _loginState extends State<login> {
                                   fieldtitle("   Password"),
                                   passwordfield(
                                       'Enter Password', _passwordcontroller),
-                                  Container(
-                                    margin: EdgeInsets.only(bottom: 35),
-                                    alignment: Alignment.bottomRight,
-                                    child: TextButton(
-                                      onPressed: () {
-                                        Navigator.pushReplacementNamed(
-                                            context, "/forgetpassword");
-                                      },
-                                      child: Text(
-                                        "Forget password?",
-                                        style:
-                                            TextStyle(color: Colors.redAccent),
-                                      ),
-                                    ),
-                                  ),
                                   custombutton("Login"),
                                 ],
                               ),
@@ -203,7 +176,7 @@ class _loginState extends State<login> {
   Widget passwordfield(String hint, TextEditingController controller) {
     return Container(
       height: 50,
-      margin: EdgeInsets.only(),
+      margin: EdgeInsets.only(bottom: 35),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.all(Radius.circular(12)),

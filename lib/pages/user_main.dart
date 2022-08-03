@@ -1,4 +1,5 @@
-import 'package:attendance_system/user/location_service.dart';
+import 'package:attendance_system/user/Utilis/Constants.dart';
+import 'package:attendance_system/user/Utilis/location_service.dart';
 import 'package:attendance_system/user/markattendance.dart';
 import 'package:attendance_system/user/monthlyreport.dart';
 import 'package:attendance_system/user/profile.dart';
@@ -47,11 +48,17 @@ class _usermainState extends State<usermain> {
   }
 
   void _RunLocationService() async {
-    LocationServices().initializa();
+    LocationServices().initialize();
 
     LocationServices().getlongitude().then((value) {
       setState(() {
         user.long = value!;
+      });
+    });
+
+    LocationServices().getlatitude().then((value) {
+      setState(() {
+        user.lat = value!;
       });
     });
   }
@@ -60,6 +67,14 @@ class _usermainState extends State<usermain> {
   Widget build(BuildContext context) {
     // ignore: prefer_const_constructors
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: (() {
+          Constants.prefs?.setBool("Loggedin", false);
+          Navigator.pushReplacementNamed(context, "/login");
+        }),
+        tooltip: 'Exit',
+        child: const Icon(Icons.exit_to_app),
+      ),
       body: IndexedStack(
         index: currentindex,
         children: [

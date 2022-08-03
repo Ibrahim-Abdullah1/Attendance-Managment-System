@@ -31,12 +31,12 @@ class _attendanceState extends State<attendance> {
   }
 
   void _getLocation() async {
-    List<Placemark> placemark =
-        await placemarkFromCoordinates(user.lat, user.long);
+    List<Placemark> newPlace = await GeocodingPlatform.instance
+        .placemarkFromCoordinates(user.lat, user.long, localeIdentifier: "en");
 
     setState(() {
       location =
-          "${placemark[0].street}, ${placemark[0].administrativeArea},${placemark[0].postalCode},${placemark[0].country}";
+          "${newPlace[0].street}, ${newPlace[0].administrativeArea},${newPlace[0].postalCode},${newPlace[0].country}";
     });
   }
 
@@ -142,6 +142,7 @@ class _attendanceState extends State<attendance> {
                         onSubmit: () async {
                           if (user.lat != 0) {
                             _getLocation();
+                            print(location);
                             QuerySnapshot snap = await FirebaseFirestore
                                 .instance
                                 .collection("Student")
@@ -194,8 +195,9 @@ class _attendanceState extends State<attendance> {
                             }
                             _key.currentState!.reset();
                           } else {
-                            Timer(Duration(seconds: 3), () async {
+                            Timer(Duration(seconds: 20), () async {
                               _getLocation();
+                              print(location);
                               QuerySnapshot snap = await FirebaseFirestore
                                   .instance
                                   .collection("Student")
@@ -324,11 +326,19 @@ class _attendanceState extends State<attendance> {
                             ),
                             Padding(
                               padding: const EdgeInsets.only(top: 5.0),
-                              child: Text(
-                                "$location",
-                                style: TextStyle(
-                                    fontSize: 14, fontWeight: FontWeight.bold),
-                              ),
+                              child: location != " "
+                                  ? Text(
+                                      "$location",
+                                      style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold),
+                                    )
+                                  : Text(
+                                      "Islamabad",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                      ),
+                                    ),
                             )
                           ],
                         ),

@@ -1,5 +1,6 @@
 // ignore_for_file: unnecessary_new, deprecated_member_use, sort_child_properties_last
 
+import 'package:attendance_system/user/Utilis/Constants.dart';
 import 'package:flutter/material.dart';
 
 class Adminpage extends StatefulWidget {
@@ -13,6 +14,14 @@ class _AdminpageState extends State<Adminpage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: (() {
+          Constants.prefs?.setBool("Loggedin", false);
+          Navigator.pushReplacementNamed(context, "/admin");
+        }),
+        tooltip: 'Exit',
+        child: const Icon(Icons.exit_to_app),
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(10),
         child: Column(
@@ -23,7 +32,7 @@ class _AdminpageState extends State<Adminpage> {
               margin: EdgeInsets.only(top: 65, bottom: 10),
               alignment: Alignment.bottomCenter,
               child: const Text(
-                "Admin Panel",
+                "Dashboard",
                 style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.bold,
@@ -77,7 +86,7 @@ class _AdminpageState extends State<Adminpage> {
             ),
             GestureDetector(
               onTap: (() {
-                Navigator.pushReplacementNamed(context, "liststudents");
+                Navigator.pushReplacementNamed(context, "/liststudents");
               }),
               child: Card(
                 shape: RoundedRectangleBorder(

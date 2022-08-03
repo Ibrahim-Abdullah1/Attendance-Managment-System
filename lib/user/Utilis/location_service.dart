@@ -4,7 +4,7 @@ class LocationServices {
   Location location = Location();
   late LocationData _locData;
 
-  Future<void> initializa() async {
+  Future<void> initialize() async {
     bool _serviceEnabled;
     PermissionStatus _permission;
 
@@ -16,6 +16,7 @@ class LocationServices {
         return;
       }
     }
+
     _permission = await location.hasPermission();
     if (_permission == PermissionStatus.denied) {
       _permission = await location.requestPermission();

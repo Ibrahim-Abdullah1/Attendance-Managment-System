@@ -1,3 +1,4 @@
+import 'package:attendance_system/pages/updateuser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -143,12 +144,16 @@ class _liststudentsState extends State<liststudents> {
                               children: [
                                 IconButton(
                                     onPressed: () {
-                                      Navigator.pushReplacementNamed(
-                                          context, "/register");
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: ((context) => updateuser(
+                                                  id: storedocs[i]['id']))));
                                     },
                                     icon: Icon(
                                       Icons.edit,
                                       size: 23,
+                                      color: Colors.teal,
                                     )),
                                 IconButton(
                                     onPressed: () {
@@ -158,6 +163,7 @@ class _liststudentsState extends State<liststudents> {
                                     icon: Icon(
                                       Icons.delete,
                                       size: 23,
+                                      color: Colors.redAccent,
                                     )),
                               ],
                             ),

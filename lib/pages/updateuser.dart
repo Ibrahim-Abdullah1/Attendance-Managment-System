@@ -4,14 +4,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class register extends StatefulWidget {
-  const register({Key? key}) : super(key: key);
+class updateuser extends StatefulWidget {
+  final String id;
+
+  updateuser({Key? key, required this.id}) : super(key: key);
 
   @override
-  State<register> createState() => _registerState();
+  State<updateuser> createState() => _updateuserState();
 }
 
-class _registerState extends State<register> {
+class _updateuserState extends State<updateuser> {
   final _formkey = GlobalKey<FormState>();
   CollectionReference students =
       FirebaseFirestore.instance.collection('Student');
@@ -20,40 +22,12 @@ class _registerState extends State<register> {
   TextEditingController _passwordcontroller = TextEditingController();
   TextEditingController _namecontroller = TextEditingController();
 
-  String _email = "";
-  String _password = "";
-  String _name = "";
-
-  void Auth_Register() async {
-    try {
-      await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: _email, password: _password);
-    } on FirebaseAuthException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text(
-          'Failed To register, Contact Admin',
-          style: TextStyle(color: Colors.redAccent),
-        ),
-        duration: Duration(seconds: 2),
-      ));
-    }
-  }
-
-  Future<ScaffoldFeatureController<SnackBar, SnackBarClosedReason>>
-      adduser_store() {
+  updateuser(id, email, name, password) async {
     return students
-        .add({"Name": _name, 'Email': _email, 'Password': _password})
-        .then((value) =>
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text(
-                'Student Registered Succesfully',
-                style: TextStyle(color: Colors.redAccent),
-              ),
-              duration: Duration(seconds: 2),
-            )))
-        .catchError((error) {
-          print("Error: $error");
-        });
+        .doc(id)
+        .update({'Name': name, 'Email': email, 'Password': password})
+        .then((value) => print("User Updated"))
+        .catchError((error) => print("Failed to Update"));
   }
 
   @override
@@ -97,7 +71,7 @@ class _registerState extends State<register> {
                     child: Column(
                       children: [
                         const Icon(
-                          Icons.app_registration,
+                          Icons.edit,
                           size: 125,
                           color: Color.fromARGB(255, 1, 255, 230),
                         ),
@@ -105,7 +79,7 @@ class _registerState extends State<register> {
                         //   height: 10,
                         // ),
                         const Text(
-                          "Register Student",
+                          "Edit Profile",
                           style: TextStyle(
                               letterSpacing: 2.5,
                               fontSize: 35,
@@ -122,22 +96,92 @@ class _registerState extends State<register> {
                           child: Container(
                             alignment: Alignment.centerLeft,
                             child: Form(
+                              //getting Specific Users Data
                               key: _formkey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  fieldtitle("   User Email"),
-                                  customfield('Enter  Email', _emailcontroller),
-                                  // const SizedBox(height: 20),
-                                  fieldtitle("   Student Name"),
-                                  customfield(
-                                      'Enter Students name', _namecontroller),
-                                  fieldtitle("   Password"),
-                                  passwordfield(
-                                      'Enter Password', _passwordcontroller),
-                                  custombutton("Login"),
-                                  register(),
-                                ],
+                              child: FutureBuilder<
+                                  DocumentSnapshot<Map<String, dynamic>>>(
+                                future: FirebaseFirestore.instance
+                                    .collection("Student")
+                                    .doc(widget.id)
+                                    .get(),
+                                builder: (_, snapshot) {
+                                  if (snapshot.hasError) {
+                                    return const Center(
+                                      child: Text("Something Went Wrong"),
+                                    );
+                                  }
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                  var data = snapshot.data!.data();
+                                  var name = data!['Name'];
+                                  var email = data['Email'];
+                                  var password = data['Password'];
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      fieldtitle("   User Email"),
+
+                                      customfield('Enter new Email',
+                                          _emailcontroller, email),
+                                      SizedBox(
+                                        height: 18,
+                                      ),
+                                      // const SizedBox(height: 20),
+                                      fieldtitle("   Student Name"),
+                                      customfield('Enter Student name',
+                                          _namecontroller, name),
+                                      SizedBox(
+                                        height: 18,
+                                      ),
+                                      fieldtitle("   Password"),
+                                      passwordfield('Enter Password',
+                                          _passwordcontroller),
+                                      GestureDetector(
+                                        onTap: () {
+                                          if (_formkey.currentState!
+                                              .validate()) {
+                                            setState(() {
+                                              email = _emailcontroller.text;
+                                              password = _passwordcontroller;
+                                              name = _namecontroller.text;
+                                            });
+                                            updateuser(widget.id, email, name,
+                                                password);
+                                            cleartext();
+                                            Navigator.pushReplacementNamed(
+                                                context, "/adminhome");
+                                          }
+                                        },
+                                        child: Container(
+                                          margin:
+                                              const EdgeInsets.only(bottom: 25),
+                                          height: 50,
+                                          decoration: const BoxDecoration(
+                                              color: Color.fromARGB(
+                                                  255, 1, 255, 230),
+                                              borderRadius: BorderRadius.all(
+                                                  Radius.circular(42))),
+                                          child: const Center(
+                                            child: Text(
+                                              "Update",
+                                              style: TextStyle(
+                                                  fontSize: 20,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.white,
+                                                  letterSpacing: 2.2),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      register(),
+                                    ],
+                                  );
+                                },
                               ),
                             ),
                           ),
@@ -163,7 +207,8 @@ class _registerState extends State<register> {
         ));
   }
 
-  Widget customfield(String hint, TextEditingController controller) {
+  Widget customfield(
+      String hint, TextEditingController controller, String initialval) {
     return Container(
       height: 50,
       decoration: const BoxDecoration(
@@ -182,20 +227,25 @@ class _registerState extends State<register> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Container(
-              child: Icon(Icons.email),
+              child: hint == "Enter new Email"
+                  ? Icon(Icons.email)
+                  : Icon(Icons.title),
             ),
           ),
           Expanded(
               child: Padding(
             padding: const EdgeInsets.only(bottom: 3, left: 5),
             child: TextFormField(
+              // initialValue: initialval,
               controller: controller,
               validator: (value) {
                 if (value == null) {
                   return "Please Fill the Field";
-                } else if (controller == _emailcontroller ||
+                } else if (controller == _emailcontroller &&
                     !value.contains("@")) {
-                  return "Please Enter Valid Email";
+                  if (hint == "Enter new Email") {
+                    return "Please Enter Valid Email";
+                  }
                 }
                 return null;
               },
@@ -262,87 +312,6 @@ class _registerState extends State<register> {
     );
   }
 
-//  Widget customnamefield(String hint, TextEditingController controller) {
-//     return Container(
-//       height: 50,
-//       decoration: const BoxDecoration(
-//         color: Colors.white,
-//         borderRadius: BorderRadius.all(Radius.circular(12)),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black12,
-//             blurRadius: 20,
-//             offset: Offset(2, 2),
-//           )
-//         ],
-//       ),
-//       child: Row(
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.all(8.0),
-//             child: Container(
-//               child: Icon(Icons.email),
-//             ),
-//           ),
-//           Expanded(
-//               child: Padding(
-//             padding: const EdgeInsets.only(bottom: 3, left: 5),
-//             child: TextFormField(
-//               controller: _emailcontroller,
-//               validator: (value) {
-//                 if (value == null) {
-//                   return "Please Fill the Field";
-//                 }
-//                 return null;
-//               },
-//               decoration: InputDecoration(
-//                 border: InputBorder.none,
-//                 hintStyle: const TextStyle(color: Colors.blueGrey),
-//                 contentPadding: const EdgeInsets.symmetric(vertical: 10),
-//                 hintText: hint,
-//               ),
-//             ),
-//           )),
-//         ],
-//       ),
-//     );
-//   }
-
-  Widget custombutton(String text) {
-    return GestureDetector(
-      onTap: () {
-        // if (_formkey.currentState!.validate()) {
-        setState(() {
-          _email = _emailcontroller.text;
-          _password = _passwordcontroller.text;
-          _name = _namecontroller.text;
-        });
-        // }
-        adduser_store();
-        Auth_Register();
-        cleartext();
-        Navigator.pushReplacementNamed(context, "/adminhome");
-      },
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 25),
-        height: 50,
-        decoration: const BoxDecoration(
-            color: Color.fromARGB(255, 1, 255, 230),
-            borderRadius: BorderRadius.all(Radius.circular(42))),
-        child: Center(
-          child: Text(
-            text,
-            style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                letterSpacing: 2.2),
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget register() {
     return Container(
       margin: const EdgeInsets.only(bottom: 22),
@@ -357,7 +326,7 @@ class _registerState extends State<register> {
                   Navigator.pushNamed(context, "/adminhome");
                 }),
                 child: Text(
-                  "Admin Dashboard",
+                  "Admin Main",
                   style: TextStyle(
                       color: Colors.black54,
                       letterSpacing: 1.5,
